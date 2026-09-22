@@ -48,13 +48,15 @@ jobs:
         continue-on-error: true
         uses: appleboy/ssh-action@v1.2.2
         with:
-          host: ${{ secrets.WEB_B_IP }}
+          host: ${{ vars.WEB_B_IP }}
           username: ubuntu
           key: ${{ secrets.DEPLOY_SSH_KEY }}
+          timeout: 60s
+          command_timeout: 10m
           script: |
             set -eu
 
-            IMAGE="${{ env.REGISTRY_HOST }}/${{ env.REGISTRY_ID }}/${{ env.IMAGE_NAME }}:${{ github.sha }}"
+            IMAGE="cr.yandex/${{ vars.YC_REGISTRY_ID }}/my-app:${{ github.sha }}"
 
             TOKEN=$(curl -fsS \
               -H "Metadata-Flavor: Google" \
@@ -64,10 +66,9 @@ jobs:
             echo "$TOKEN" | docker login \
               --username iam \
               --password-stdin \
-              "${{ env.REGISTRY_HOST }}"
+              cr.yandex
 
             docker pull "$IMAGE"
-
             docker rm -f diplom-app 2>/dev/null || true
 
             docker run -d \
@@ -77,7 +78,6 @@ jobs:
               "$IMAGE"
 
             docker image prune -f
-
             curl -fsS http://localhost/ > /dev/null
 
       - name: Report web-b deployment failure
@@ -85,17 +85,18 @@ jobs:
         run: echo "web-b deployment failed; continuing with web-d"
 
 
-
       - name: Deploy to web-d
         uses: appleboy/ssh-action@v1.2.2
         with:
-          host: ${{ secrets.WEB_D_IP }}
+          host: ${{ vars.WEB_D_IP }}
           username: ubuntu
           key: ${{ secrets.DEPLOY_SSH_KEY }}
+          timeout: 60s
+          command_timeout: 10m
           script: |
             set -eu
 
-            IMAGE="${{ env.REGISTRY_HOST }}/${{ env.REGISTRY_ID }}/${{ env.IMAGE_NAME }}:${{ github.sha }}"
+            IMAGE="cr.yandex/${{ vars.YC_REGISTRY_ID }}/my-app:${{ github.sha }}"
 
             TOKEN=$(curl -fsS \
               -H "Metadata-Flavor: Google" \
@@ -105,10 +106,9 @@ jobs:
             echo "$TOKEN" | docker login \
               --username iam \
               --password-stdin \
-              "${{ env.REGISTRY_HOST }}"
+              cr.yandex
 
             docker pull "$IMAGE"
-
             docker rm -f diplom-app 2>/dev/null || true
 
             docker run -d \
@@ -118,7 +118,6 @@ jobs:
               "$IMAGE"
 
             docker image prune -f
-
             curl -fsS http://localhost/ > /dev/null
 
       - name: Deployment summary
