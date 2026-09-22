@@ -44,6 +44,8 @@ jobs:
             ${{ env.REGISTRY_HOST }}/${{ env.REGISTRY_ID }}/${{ env.IMAGE_NAME }}:latest
 
       - name: Deploy to web-b
+        id: deploy_web_b
+        continue-on-error: true
         uses: appleboy/ssh-action@v1.2.2
         with:
           host: ${{ secrets.WEB_B_IP }}
@@ -77,6 +79,12 @@ jobs:
             docker image prune -f
 
             curl -fsS http://localhost/ > /dev/null
+
+      - name: Report web-b deployment failure
+        if: steps.deploy_web_b.outcome == 'failure'
+        run: echo "web-b deployment failed; continuing with web-d"
+
+
 
       - name: Deploy to web-d
         uses: appleboy/ssh-action@v1.2.2
@@ -112,3 +120,9 @@ jobs:
             docker image prune -f
 
             curl -fsS http://localhost/ > /dev/null
+
+      - name: Deployment summary
+        if: always()
+        run: |
+          echo "web-b deployment was allowed to fail"
+          echo "web-d deployment is the required target"
