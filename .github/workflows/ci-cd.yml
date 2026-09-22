@@ -28,8 +28,8 @@ jobs:
         uses: docker/login-action@v3
         with:
           registry: cr.yandex
-          username: ${{ secrets.YC_ACCESS_KEY_ID }}
-          password: ${{ secrets.YC_SECRET_KEY }}
+          username: iam
+          password: ${{ secrets.YC_IAM_TOKEN }}
 
       - name: Build and push image
         uses: docker/build-push-action@v6
