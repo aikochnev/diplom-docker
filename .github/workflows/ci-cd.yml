@@ -40,8 +40,8 @@ jobs:
           provenance: false
           sbom: false
           tags: |
-            ${{ env.REGISTRY_HOST }}/${{ env.REGISTRY_ID }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
-            ${{ env.REGISTRY_HOST }}/${{ env.REGISTRY_ID }}/${{ env.IMAGE_NAME }}:latest
+            cr.yandex/${{ vars.YC_REGISTRY_ID }}/my-app:${{ github.sha }}
+            cr.yandex/${{ vars.YC_REGISTRY_ID }}/my-app:latest
 
       - name: Deploy to web-b
         id: deploy_web_b
